@@ -7,4 +7,4 @@ from class_management_back.schema.user import User
 
 def get_user_from_token():
     args = parse_from_request(Token)
-    user = User(**jwt.decode(args.token, JWT_SECRET, algorithm="HS256"))
+    return User(**jwt.decode(args.token, JWT_SECRET, algorithm="HS256"))
