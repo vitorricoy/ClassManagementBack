@@ -5,6 +5,10 @@ class UserCreation(BaseModel):
     name: str
     password:str
 
+class GetUser(BaseModel):
+    email: str
+    password: str
+
 class User(BaseModel):
     code: int
     email: str

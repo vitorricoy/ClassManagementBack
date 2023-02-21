@@ -1,3 +1,3 @@
 import os
 
-JWT_SECRET = os.getenv('JWT_SECRET')
+JWT_SECRET = os.getenv('JWT_SECRET') or ''
