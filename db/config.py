@@ -54,9 +54,7 @@ class DbPool:
             raise TypeError(f"Bad conn: {conn}")
 
 
-engine = create_engine(
-    DB_URI, client_encoding="utf-8", pool_recycle=3600
-)
+engine = create_engine(DB_URI, client_encoding="utf-8", pool_recycle=3600)
 
 Session = scoped_session(sessionmaker(bind=engine))
 

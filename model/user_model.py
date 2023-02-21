@@ -1,5 +1,9 @@
 from class_management_back.db.config import query_db
-from class_management_back.exceptions.user import AccountAlreadyExistsException, CouldNotFoundAccountException, ErrorCreatingAccountException
+from class_management_back.exceptions.user import (
+    AccountAlreadyExistsException,
+    CouldNotFoundAccountException,
+    ErrorCreatingAccountException,
+)
 from class_management_back.schema.user import User
 
 
@@ -26,7 +30,7 @@ class UserModel:
         if not result[0]:
             raise ErrorCreatingAccountException()
         return User(**result[0])
-    
+
     def get_by_email_and_password(self, email: str, password: str):
         query = """
             SELECT

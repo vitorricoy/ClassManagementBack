@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 app = Flask(__name__)
 api = Api(app)
 
-api.add_resource(DataResource, '/data')
-api.add_resource(UserResource, '/user')
+api.add_resource(DataResource, "/data")
+api.add_resource(UserResource, "/user")
 load_dotenv()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
