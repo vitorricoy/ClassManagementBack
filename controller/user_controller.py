@@ -2,6 +2,7 @@ from flask_restful import Resource, reqparse
 import jwt
 from class_management_back.environment import JWT_SECRET
 from class_management_back.helper.parser import parse_from_request
+from class_management_back.helper.user import get_user_from_token
 from class_management_back.schema.common import Token
 from class_management_back.schema.user import User, UserCreation
 from class_management_back.service.user_service import UserService
@@ -16,6 +17,4 @@ class UserResource(Resource):
         return encoded_jwt, 200
 
     def get(self):
-        args = parse_from_request(Token)
-        user = User(**jwt.decode(args.token, JWT_SECRET, algorithm="HS256"))
-        return user, 200
+        return get_user_from_token(), 200
