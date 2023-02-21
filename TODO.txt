@@ -1,0 +1,2 @@
+Tela de selecionar turmas. Ao criar uma nova turma deixa subir os dados.
+Pensar sobre como vai ser a atualização de dados (provavelmente um PUT que sobrescreve tudo)
