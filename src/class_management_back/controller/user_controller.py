@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse
 import jwt
-from class_management_back.environment import JWT_SECRET
+from class_management_back.src.class_management_back.environment import JWT_SECRET
 from class_management_back.exceptions.user import (
     AccountAlreadyExistsException,
     CouldNotFoundAccountException,
