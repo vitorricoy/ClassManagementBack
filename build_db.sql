@@ -1,6 +1,6 @@
 CREATE DATABASE class_management;
 
-CREATE TABLE user (
+CREATE TABLE account (
     code serial PRIMARY KEY,
     name text NOT NULL, 
     email text NOT NULL, 
@@ -10,7 +10,7 @@ CREATE TABLE user (
 CREATE TABLE class (
     code serial PRIMARY KEY,
     name text NOT NULL,
-    user_code int REFERENCES user(code) NOT NULL
+    user_code int REFERENCES account(code) NOT NULL
 );
 
 CREATE TABLE student (
@@ -53,7 +53,7 @@ CREATE TABLE activity_delivery (
 
 CREATE TABLE activity_grade (
     code serial PRIMARY KEY,
-    student_code int REFERENCES student(code) NOT NULL,,
+    student_code int REFERENCES student(code) NOT NULL,
     material_code int REFERENCES material(code) NOT NULL,
-    grade double NOT NULL
+    grade float NOT NULL
 );
