@@ -1,3 +1,5 @@
+CREATE DATABASE class_management;
+
 CREATE TABLE user (
     code serial PRIMARY KEY,
     name text NOT NULL, 
