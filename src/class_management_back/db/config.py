@@ -6,7 +6,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Connection
 from sqlalchemy.orm import sessionmaker, scoped_session
 
-from class_management_back.src.class_management_back.environment import DB_URI
+from class_management_back.environment import DB_URI
 
 M = TypeVar("M", bound=BaseModel)
 
