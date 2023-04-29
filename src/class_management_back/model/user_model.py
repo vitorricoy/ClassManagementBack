@@ -1,7 +1,7 @@
 from class_management_back.db.config import query_db
 from class_management_back.exceptions.user import (
     AccountAlreadyExistsException,
-    CouldNotFoundAccountException,
+    CouldNotFindAccountException,
     ErrorCreatingAccountException,
 )
 from class_management_back.schema.user import User
@@ -10,8 +10,8 @@ from class_management_back.schema.user import User
 class UserModel:
     def create(self, name: str, email: str, password: str):
         query = """
-            INSER INTO 
-                user (
+            INSERT INTO 
+                account (
                     name, 
                     email, 
                     password
@@ -21,7 +21,7 @@ class UserModel:
                 :email, 
                 :password
             )
-            ON CONFLICT DO NOTHING
+            ON CONFLICT(email) DO NOTHING
             RETURNING *;
         """
         result = query_db(query, name=name, email=email, password=password)
@@ -43,5 +43,5 @@ class UserModel:
         """
         result = query_db(query, email=email, password=password)
         if not result or not result[0]:
-            raise CouldNotFoundAccountException()
+            raise CouldNotFindAccountException()
         return User(**result[0])

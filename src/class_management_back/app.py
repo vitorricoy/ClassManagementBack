@@ -9,5 +9,11 @@ api = Api(app)
 api.add_resource(DataResource, "/data")
 api.add_resource(UserResource, "/user")
 
+
+@app.route("/")
+def index():
+    return "Index Page"
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=8787, host="0.0.0.0")

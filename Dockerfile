@@ -12,4 +12,5 @@ WORKDIR /class_management_back
 RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev
 
-CMD ["python", "src/class_management_back/app.py"]
+EXPOSE 8787
+

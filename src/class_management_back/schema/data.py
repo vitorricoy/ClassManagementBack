@@ -1,11 +1,26 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, root_validator
+from typing import Optional
 
 
 class DataUploadParams(BaseModel):
     class_name: str
     ignore_user_names: list[str]
     ignore_activities: list[str]
+
+    @root_validator(pre=True)
+    def fill_lists(cls, values):
+        values["ignore_user_names"] = (
+            values.get("ignore_user_names").split(",")
+            if values.get("ignore_user_names")
+            else []
+        )
+        values["ignore_activities"] = (
+            values.get("ignore_activities").split(",")
+            if values.get("ignore_user_names")
+            else []
+        )
+        return values
 
 
 class Class(BaseModel):

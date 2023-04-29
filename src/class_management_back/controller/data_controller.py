@@ -1,3 +1,4 @@
+from io import StringIO
 from flask import request
 from flask_restful import Resource
 import pandas as pd
@@ -16,9 +17,15 @@ class DataResource(Resource):
         file_grade = request.files.get("file_grade")
         if not file_log or not file_delivery or not file_grade:
             return "InvalidFile", 400
-        log_data = pd.read_csv(file_log.read())
-        delivery_data = pd.read_csv(file_delivery.read())
-        grade_data = pd.read_csv(file_grade.read())
-        args = parse_from_request(DataUploadParams)
+        log_data = pd.read_csv(
+            StringIO(file_log.read().decode("utf-8")), encoding="utf-8"
+        )
+        delivery_data = pd.read_csv(
+            StringIO(file_delivery.read().decode("utf-8")), encoding="utf-8"
+        )
+        grade_data = pd.read_csv(
+            StringIO(file_grade.read().decode("utf-8")), encoding="utf-8"
+        )
+        args = parse_from_request(DataUploadParams, location="form")
         data_service.process_data(log_data, delivery_data, grade_data, args)
         return "success", 200

@@ -24,7 +24,7 @@ from class_management_back.schema.data import (
 class DataModel:
     def create_class(self, name: str, user_code: int):
         query = """
-            INSER INTO 
+            INSERT INTO 
                 class (
                     name, 
                     user_code
@@ -43,7 +43,7 @@ class DataModel:
 
     def create_student(self, name: str, email: str, class_code: int):
         query = """
-            INSER INTO 
+            INSERT INTO 
                 student (
                     name, 
                     email,
@@ -64,7 +64,7 @@ class DataModel:
 
     def create_module(self, name: str, class_code: int):
         query = """
-            INSER INTO 
+            INSERT INTO 
                 module (
                     name,
                     class_code
@@ -83,7 +83,7 @@ class DataModel:
 
     def create_material(self, name: str, module_code: int):
         query = """
-            INSER INTO 
+            INSERT INTO 
                 material (
                     name,
                     module_code
@@ -102,7 +102,7 @@ class DataModel:
 
     def create_class_view(self, student_code: int, hour: str):
         query = """
-            INSER INTO 
+            INSERT INTO 
                 class_view (
                     student_code,
                     hour
@@ -114,16 +114,16 @@ class DataModel:
             ON CONFLICT DO NOTHING
             RETURNING *;
         """
-        result = query_db(
-            query, student_code=student_code, hour=hour
-        )
+        result = query_db(query, student_code=student_code, hour=hour)
         if not result or not result[0]:
             raise ErrorCreatingClassViewException()
         return ClassView(**result[0])
 
-    def create_material_view(self, material_code: int, student_code: int, hour: str):
+    def create_material_view(
+        self, material_code: int, student_code: int, hour: str
+    ):
         query = """
-            INSER INTO 
+            INSERT INTO 
                 material_view (
                     student_code,
                     material_code,
@@ -138,7 +138,10 @@ class DataModel:
             RETURNING *;
         """
         result = query_db(
-            query, student_code=student_code, material_code=material_code, hour=hour
+            query,
+            student_code=student_code,
+            material_code=material_code,
+            hour=hour,
         )
         if not result or not result[0]:
             raise ErrorCreatingMaterialViewException()
@@ -146,7 +149,7 @@ class DataModel:
 
     def create_activity_delivery(self, material_code: int, student_code: int):
         query = """
-            INSER INTO 
+            INSERT INTO 
                 activity_delivery (
                     student_code,
                     material_code
@@ -165,9 +168,11 @@ class DataModel:
             raise ErrorCreatingActivityDeliveryException()
         return ActivityDelivery(**result[0])
 
-    def create_activity_grade(self, material_code: int, student_code: int, grade: float):
+    def create_activity_grade(
+        self, material_code: int, student_code: int, grade: float
+    ):
         query = """
-            INSER INTO 
+            INSERT INTO 
                 activity_grade (
                     student_code,
                     material_code,
@@ -182,7 +187,10 @@ class DataModel:
             RETURNING *;
         """
         result = query_db(
-            query, student_code=student_code, material_code=material_code, grade=grade
+            query,
+            student_code=student_code,
+            material_code=material_code,
+            grade=grade,
         )
         if not result or not result[0]:
             raise ErrorCreatingActivityGradeException()

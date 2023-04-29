@@ -21,4 +21,3 @@ class User(BaseModel):
     code: int
     email: str
     name: str
-    password: str

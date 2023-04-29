@@ -5,6 +5,6 @@ from class_management_back.schema.common import Token
 from class_management_back.schema.user import User
 
 
-def get_user_from_token():
-    args = parse_from_request(Token)
-    return User(**jwt.decode(args.token, JWT_SECRET, algorithm="HS256"))
+def get_user_from_token(location=None):
+    args = parse_from_request(Token, location=location)
+    return User(**jwt.decode(args.token, JWT_SECRET, algorithms=["HS256"]))

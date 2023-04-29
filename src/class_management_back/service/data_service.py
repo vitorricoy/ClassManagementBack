@@ -143,8 +143,11 @@ class DataService:
                     if substr in row["Contexto do Evento"]:
                         row["modulo"] = module
                         return row
+            row["modulo"] = None
+            return row
 
-        return data.apply(identify_module, axis=1)
+        data = data.apply(identify_module, axis=1)
+        return data[data["modulo"].notnull()]
 
     def _treat_log_data(
         self,
@@ -152,6 +155,9 @@ class DataService:
         ignored_users: list[str],
         ignored_activities: list[str],
     ):
+        hour_column = str(data.columns[data.columns.str.endswith("Hora")][0])
+        data["Hora"] = data[hour_column]
+        del data[hour_column]
         data["Hora"] = pd.to_datetime(data["Hora"], format="%d/%m/%Y %H:%M")
         data = data.apply(
             self._handle_operations_in_behalf, axis=1
@@ -167,6 +173,7 @@ class DataService:
 
         data = data[~data["Contexto do Evento"].isin(ignored_activities)]
 
+        data.to_csv("log_data.csv")
         data = self._assign_modules(data)  # type: ignore
         return data
 
@@ -183,7 +190,8 @@ class DataService:
 
     def _treat_grade_data(self, data: DataFrame):
         data = data.filter(
-            regex="(Endereço de email)|(Questionário:(.*)\\(Real\\))", axis=1
+            regex="Nome|Sobrenome|(Endereço de email)|(Questionário:(.*)\\(Real\\))",
+            axis=1,
         )
 
         def isfloat(num):
@@ -193,31 +201,32 @@ class DataService:
             except ValueError:
                 return False
 
+        name_column = (data["Nome"] + " " + data["Sobrenome"]).copy()
         for column in data:
             column = str(column)
             if "Questionário" in column:
-                new_column = (
-                    column.replace('Questionário: ', '')
-                )
+                new_column = column.replace("Questionário: ", "")
                 data[new_column] = (
                     data[column].apply(lambda x: isfloat(x)).astype("bool")
                 )
                 del data[column]
+        del data["Sobrenome"]
+        data["Nome"] = name_column
         return data
 
     def _save_class(self, name: str):
-        user = get_user_from_token()
+        user = get_user_from_token(location="form")
         return data_model.create_class(name, user.code)
 
     def _save_students(self, delivery_data: DataFrame, class_code: int):
         name_email_data = delivery_data[
-            ["Endereço de email"]
+            ["Endereço de email", "Nome"]
         ].drop_duplicates()
         return [
             data_model.create_student(
-                str(name), str(row["Endereço de email"]), class_code
+                str(row["Nome"]), str(row["Endereço de email"]), class_code
             )
-            for name, row in name_email_data.iterrows()
+            for _, row in name_email_data.iterrows()
         ]
 
     def _save_modules(self, class_code: int):
@@ -270,7 +279,7 @@ class DataService:
             (
                 material
                 for material in materials
-                if material.name.lower() == name.lower()
+                if material.name.lower() == name.strip().lower()
             ),
             None,
         )
@@ -279,19 +288,23 @@ class DataService:
         raise InvalidMaterialName(name)
 
     def _is_valid_activity(self, name: str):
-        return name.startswith('Arquivo: ') or name.startswith('Questionário: ') or name.startswith('Tarefa: ') or name.startswith('URL: ')
+        return (
+            name.startswith("Arquivo: ")
+            or name.startswith("Questionário: ")
+            or name.startswith("Tarefa: ")
+            or name.startswith("URL: ")
+        )
 
     def _get_activity_name(self, name: str):
-        names = name.split(':')
-        return ':'.join(names[1:])
+        names = name.split(":")
+        return ":".join(names[1:])
 
     def _save_materials(self, modules: list[Module], log_data: DataFrame):
-        events_modules_data = log_data[
-            ["Contexto do Evento", "modulo"]
-        ].drop_duplicates()
+        events_modules_data = log_data[["Contexto do Evento", "modulo"]]
+        events_modules_data = events_modules_data.drop_duplicates()
         return [
             data_model.create_material(
-                self._get_activity_name(row["Contexto do Evento"]),
+                self._get_activity_name(row["Contexto do Evento"]).strip(),
                 self._get_module_code_by_name(row["modulo"], modules),
             )
             for _, row in events_modules_data.iterrows()
@@ -305,8 +318,13 @@ class DataService:
         log_data: DataFrame,
     ):
         events_modules_data = log_data[
-            ["Contexto do Evento", "Nome completo",
-                "Nome do evento", "modulo", "Hora"]
+            [
+                "Contexto do Evento",
+                "Nome completo",
+                "Nome do evento",
+                "modulo",
+                "Hora",
+            ]
         ].drop_duplicates()
         return [
             data_model.create_material_view(
@@ -327,8 +345,13 @@ class DataService:
         log_data: DataFrame,
     ):
         events_modules_data = log_data[
-            ["Contexto do Evento", "Nome completo",
-                "Nome do evento", "modulo", "Hora"]
+            [
+                "Contexto do Evento",
+                "Nome completo",
+                "Nome do evento",
+                "modulo",
+                "Hora",
+            ]
         ].drop_duplicates()
         return [
             data_model.create_class_view(
@@ -339,27 +362,42 @@ class DataService:
             if row["Nome do evento"] == "Curso visto"
         ]
 
-    def _save_activity_delivery(self, students: list[Student], materials: list[Material], delivery_data: DataFrame):
+    def _save_activity_delivery(
+        self,
+        students: list[Student],
+        materials: list[Material],
+        delivery_data: DataFrame,
+    ):
         return [
             data_model.create_activity_delivery(
-                self._get_student_code_by_email(
-                    str(row["Endereço de email"]), students),
                 self._get_material_code_by_name(str(column), materials),
+                self._get_student_code_by_email(
+                    str(row["Endereço de email"]), students
+                ),
             )
             for _, row in delivery_data.iterrows()
-            for column in delivery_data if '@' not in str(column) if row[column]
+            for column in delivery_data
+            if "email" not in str(column)
+            if row[column]
         ]
 
-    def _save_activity_grade(self, students: list[Student], materials: list[Material], grade_data: DataFrame):
+    def _save_activity_grade(
+        self,
+        students: list[Student],
+        materials: list[Material],
+        grade_data: DataFrame,
+    ):
         return [
             data_model.create_activity_grade(
                 self._get_student_code_by_email(
-                    str(row["Endereço de email"]), students),
+                    str(row["Endereço de email"]), students
+                ),
                 self._get_material_code_by_name(str(column), materials),
                 float(str(row[column])),
             )
             for _, row in grade_data.iterrows()
-            for column in grade_data if '@' not in str(column)
+            for column in grade_data
+            if "email" not in str(column) and "Nome" not in str(column)
         ]
 
     def process_data(
@@ -377,10 +415,8 @@ class DataService:
         grade_data = self._treat_grade_data(grade_data)
         modules = self._save_modules(new_class.code)
         materials = self._save_materials(modules, log_data)
-        students = self._save_students(delivery_data, new_class.code)
+        students = self._save_students(grade_data, new_class.code)
         self._save_class_view(students, log_data)
-        self._save_material_view(
-            materials, students, log_data
-        )
+        self._save_material_view(materials, students, log_data)
         self._save_activity_delivery(students, materials, delivery_data)
         self._save_activity_grade(students, materials, grade_data)

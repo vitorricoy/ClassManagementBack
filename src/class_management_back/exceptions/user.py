@@ -6,5 +6,5 @@ class ErrorCreatingAccountException(Exception):
     pass
 
 
-class CouldNotFoundAccountException(Exception):
+class CouldNotFindAccountException(Exception):
     pass

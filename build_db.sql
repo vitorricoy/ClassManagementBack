@@ -57,3 +57,5 @@ CREATE TABLE activity_grade (
     material_code int REFERENCES material(code) NOT NULL,
     grade float NOT NULL
 );
+
+CREATE UNIQUE INDEX ON account(email);
