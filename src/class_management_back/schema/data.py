@@ -68,3 +68,9 @@ class ActivityGrade(BaseModel):
     student_code: int
     material_code: int
     grade: float
+
+
+class Prediction(BaseModel):
+    code: int
+    student_code: int
+    probability: float

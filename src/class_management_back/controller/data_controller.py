@@ -2,7 +2,9 @@ from io import StringIO
 from flask import request
 from flask_restful import Resource
 import pandas as pd
-from class_management_back.helper.parser import parse_from_request
+from class_management_back.helper.parser import (
+    parse_from_request_with_location,
+)
 from class_management_back.schema.data import DataUploadParams
 
 from class_management_back.service.data_service import DataService
@@ -26,6 +28,6 @@ class DataResource(Resource):
         grade_data = pd.read_csv(
             StringIO(file_grade.read().decode("utf-8")), encoding="utf-8"
         )
-        args = parse_from_request(DataUploadParams, location="form")
+        args = parse_from_request_with_location(DataUploadParams, "form")
         data_service.process_data(log_data, delivery_data, grade_data, args)
         return "success", 200

@@ -58,4 +58,10 @@ CREATE TABLE activity_grade (
     grade float NOT NULL
 );
 
+CREATE TABLE approval_prediction (
+    code serial PRIMARY KEY,
+    student_code int REFERENCES student(code) NOT NULL,
+    probability float NOT NULL
+);
+
 CREATE UNIQUE INDEX ON account(email);

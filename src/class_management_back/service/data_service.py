@@ -1,3 +1,4 @@
+import re
 from typing import Literal
 from pandas import DataFrame
 import pandas as pd
@@ -7,7 +8,7 @@ from class_management_back.exceptions.log_data import (
     InvalidStudentName,
     InvalidModuleName,
 )
-from class_management_back.helper.user import get_user_from_token
+from class_management_back.helper.user import get_user_from_token_with_location
 from class_management_back.schema.data import (
     DataUploadParams,
     Material,
@@ -15,8 +16,12 @@ from class_management_back.schema.data import (
     Student,
 )
 from class_management_back.model.data_model import DataModel
+import numpy as np
+from joblib import load
 
 data_model = DataModel()
+
+predictions = load("model.joblib")
 
 all_modules = [
     "Boas vindas e preparação",
@@ -26,6 +31,87 @@ all_modules = [
     "Módulo 4",
     "Módulo Bônus",
     "Material extra",
+]
+
+blacklist = [
+    "Dúvidas",
+    "Avaliação final",
+    "FORMATURA",
+    "Desafio - Função Maior",
+    "Desafio - Função MaiorMenor",
+    "Desafio - Função MaiorMenor3",
+    "Desafios - Algoritmos de busca",
+    "Exercícios práticos - Sintaxe básica",
+    "Exercícios práticos - Sintaxe básica.1",
+    "Resolução dos exercícios - Sintaxe básica",
+    "Notebook da resolução dos exercícios - Sintaxe básica",
+    "Exercícios práticos - Strings",
+    "Exercícios práticos - Variáveis - Strings",
+    "Resolução dos exercícios - Variáveis - Strings",
+    "Notebook da resolução dos exercícios - Variáveis - Strings",
+    "Exercícios práticos - Tuplas",
+    "Exercícios práticos - Variáveis - Tuplas",
+    "Resolução dos exercícios - Variáveis - Tuplas",
+    "Notebook da resolução dos exercícios - Tuplas",
+    "Exercícios práticos - Listas",
+    "Exercícios práticos - Variáveis - Listas",
+    "Resolução dos exercícios - Variáveis - Listas",
+    "Notebook da resolução dos exercícios - Variáveis - Listas",
+    "2022-09-01 07:59:00.1",
+    "2022-09-01 07:59:00",
+    "2022-09-01 07:59:00.2",
+    "Exercícios práticos - Conjuntos",
+    "Exercícios práticos - Variáveis - Conjuntos",
+    "Resolução dos exercícios - Variáveis - Conjuntos",
+    "Notebook da resolução dos exercícios - Variáveis - Conjuntos",
+    "Exercícios práticos - Dicionários",
+    "Exercícios práticos - Variáveis - Dicionários",
+    "Resolução dos exercícios - Variáveis - Dicionários",
+    "Notebook da resolução dos exercícios - Variáveis - Dicionários",
+    "Exercícios práticos - Operadores",
+    "Exercícios práticos - Operadores.1",
+    "Resolução dos exercícios - Operadores",
+    "Notebook da resolução dos exercícios - Operadores",
+    "Exercícios práticos - Operadores - Desafio",
+    "Exercícios práticos - Operadores - Desafio.1",
+    "Resolução dos exercícios - Operadores - Desafio",
+    "Notebook da resolução dos exercícios - Operadores - Desafio",
+    "Exercícios práticos - Estruturas condicionais",
+    "Exercícios práticos - Estruturas condicionais.1",
+    "Resolução dos exercícios - Estruturas condicionais",
+    "Notebook da resolução dos exercícios - Estruturas condicionais",
+    "Exercícios práticos - Estruturas condicionais - Desafio",
+    "Exercícios práticos - Estruturas condicionais - Desafio.1",
+    "Resolução dos exercícios - Estruturas condicionais - Desafio",
+    "Notebook da resolução dos exercícios - Estruturas condicionais - Desafio",
+    "Monitoria (gravada) sobre operadores e estruturas condicionais",
+    "Notebook da monitoria sobre operadores e estruturas condicionais",
+    "Exercícios práticos - Estruturas de repetição",
+    "Exercícios práticos - Estruturas de repetição.1",
+    "Resolução dos exercícios - Estruturas de repetição",
+    "Notebook da resolução dos exercícios - Estruturas de repetição",
+    "Exercícios práticos - Estruturas de repetição - Desafio",
+    "Exercícios práticos - Estruturas de repetição - Desafio.1",
+    "Resolução dos exercícios - Estruturas de repetição - Desafio",
+    "Notebook da resolução dos exercícios - Estruturas de repetição - Desafio",
+    "Monitoria (gravada) sobre estruturas de repetição",
+    "Notebook da monitoria sobre estruturas de repetição",
+    "Formulário pré-curso",
+    "Cronograma",
+    "Projeto OnlineBioinfo",
+    "Canal do YouTube OnlineBioinfo",
+    "Perfil no Instagram OnlineBioinfo",
+    "Página no LinkedIn do OnlineBioinfo",
+    "Gravação da aula sobre Bioinformática Estrutural",
+    "aula 1 - Introdução",
+    "aula 2 - Fundamentos",
+    "aula 3 - PDB",
+    "aula 4 - PDB",
+    "aula 5 - Modelagem comparativa",
+    "aula 6 - Modelagem threading",
+    "aula 7 - Visualização molecular",
+    "aula 8 - Docking molecular",
+    "aula 9 - Análise de interações",
 ]
 
 
@@ -215,7 +301,7 @@ class DataService:
         return data
 
     def _save_class(self, name: str):
-        user = get_user_from_token(location="form")
+        user = get_user_from_token_with_location(location="form")
         return data_model.create_class(name, user.code)
 
     def _save_students(self, delivery_data: DataFrame, class_code: int):
@@ -400,6 +486,115 @@ class DataService:
             if "email" not in str(column) and "Nome" not in str(column)
         ]
 
+    def _process_prediction_data(self, delivery_data: DataFrame):
+        df = delivery_data[
+            delivery_data["Endereço de email"] != "nailtonjr@gmail.com"
+        ]
+        df = df.drop(df.filter(regex="^(Unnamed*)", axis=1).columns, axis=1)
+        df_temp = df.copy()
+        for column in df.columns:
+            new_column = re.sub("[\(\[].*?[\)\]]", "", column).strip()
+            df_temp[new_column] = df[column]
+            if new_column != column:
+                del df_temp[column]
+        df = df_temp
+
+        mapa = {"Não concluído": True, "Concluído": False}
+
+        for column in df:
+            if column != "Endereço de email":
+                df[column] = df[column].map(mapa).astype("bool")
+            if "Entrega" in column:
+                new_column = "Exercício Prático - " + column.split(" - ", 1)[1]
+                df[new_column] = df[column]
+                del df[column]
+            if column in blacklist or re.match(
+                "\d{4}-\d\d-\d\d \d\d:\d\d:\d\d(.\d)*", column
+            ):
+                del df[column]
+
+        exs = [
+            "Exercícios de revisão - Sintaxe básica",
+            "Exercícios de revisão - Variáveis - Parte I",
+            "Exercícios de revisão - Variáveis - Parte II",
+            "Exercícios de revisão - Módulo 1",
+            "Exercício Prático - Sintaxe básica",
+            "Exercício Prático - Strings",
+            "Exercício Prático - Tuplas",
+            "Exercício Prático - Listas",
+            "Exercício Prático - Conjuntos",
+            "Exercício Prático - Dicionários",
+            "Exercício Prático -  Operadores",
+            "Exercício Prático -  Operadores - Desafio",
+            "Exercício Prático -  Estruturas condicionais",
+            "Exercício Prático -  Estruturas condicionais - Desafio",
+            "Exercício Prático -  Estruturas de repetição",
+            "Exercício Prático -  Estruturas de repetição - Desafio",
+        ]
+
+        df = df.set_index("Endereço de email")
+
+        df_exs = df.copy()
+        df_ativ = df.copy()
+
+        for column in df:
+            if column in exs:
+                del df_ativ[column]
+            else:
+                del df_exs[column]
+
+        def calc_perc(row):
+            acc = 0
+            for column in row:
+                if type(column) == bool:
+                    acc += column
+            acc /= len(row)
+            row["perc"] = acc
+            return row
+
+        df_ativ = df_ativ.apply(calc_perc, axis=1)
+        df_ativ_perc = df_ativ[["perc"]]
+        # df_ativ_perc.plot()
+
+        df_exs = df_exs.apply(calc_perc, axis=1)
+        df_exs_perc = df_exs[["perc"]]
+        # df_exs_perc.plot()
+
+        df_ativ_perc["passou"] = df_ativ_perc["perc"] > 0.75
+        df_exs_perc["passou"] = df_exs_perc["perc"] > 0.6
+
+        linhas = []
+        for email in df_ativ_perc.index:
+            passou = (
+                df_ativ_perc.loc[email].passou
+                and df_exs_perc.loc[email].passou
+            )
+            linha = {"email": email, "passou": passou}
+            linhas.append(linha)
+        df2 = pd.DataFrame.from_dict(linhas)
+        df2 = df2.set_index("email")
+        df3 = pd.concat([df2, df], axis=1)
+        return df3
+
+    def _save_predictions(
+        self, delivery_data: DataFrame, students: list[Student]
+    ):
+        df = self._process_prediction_data(delivery_data)
+        emails = df.index.values.tolist()
+        arr = df.to_numpy()
+        num_activ = 0
+        for i in range(arr.shape[1]):
+            if np.any(arr[:, i]):
+                num_activ = i + 1
+        X_data = arr[:, 1: num_activ + 1]
+
+        prediction = predictions[num_activ - 1].predict_proba(X_data)[:, 1]
+        for i, v in enumerate(prediction):
+            data_model.create_approval_prediction(
+                self._get_student_code_by_email(emails[i], students),
+                v,
+            )
+
     def process_data(
         self,
         log_data: DataFrame,
@@ -411,6 +606,7 @@ class DataService:
         log_data = self._treat_log_data(
             log_data, args.ignore_user_names, args.ignore_activities
         )
+        original_delivery_data = delivery_data.copy()
         delivery_data = self._treat_delivery_data(delivery_data)
         grade_data = self._treat_grade_data(grade_data)
         modules = self._save_modules(new_class.code)
@@ -420,3 +616,4 @@ class DataService:
         self._save_material_view(materials, students, log_data)
         self._save_activity_delivery(students, materials, delivery_data)
         self._save_activity_grade(students, materials, grade_data)
+        self._save_predictions(original_delivery_data, students)

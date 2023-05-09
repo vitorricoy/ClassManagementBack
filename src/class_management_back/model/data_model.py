@@ -7,6 +7,7 @@ from class_management_back.exceptions.log_data import (
     ErrorCreatingMaterialException,
     ErrorCreatingMaterialViewException,
     ErrorCreatingModuleException,
+    ErrorCreatingPredictionException,
     ErrorCreatingStudentException,
 )
 from class_management_back.schema.data import (
@@ -17,6 +18,7 @@ from class_management_back.schema.data import (
     Material,
     MaterialView,
     Module,
+    Prediction,
     Student,
 )
 
@@ -195,3 +197,28 @@ class DataModel:
         if not result or not result[0]:
             raise ErrorCreatingActivityGradeException()
         return ActivityGrade(**result[0])
+
+    def create_approval_prediction(
+        self, student_code: int, probability: float
+    ):
+        query = """
+            INSERT INTO 
+                approval_prediction (
+                    student_code,
+                    probability
+                ) 
+            VALUES(
+                :student_code, 
+                :probability
+            )
+            ON CONFLICT DO NOTHING
+            RETURNING *;
+        """
+        result = query_db(
+            query,
+            student_code=student_code,
+            probability=probability,
+        )
+        if not result or not result[0]:
+            raise ErrorCreatingPredictionException()
+        return Prediction(**result[0])

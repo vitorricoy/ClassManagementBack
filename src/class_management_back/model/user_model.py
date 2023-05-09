@@ -36,7 +36,7 @@ class UserModel:
             SELECT
                 *
             FROM
-                user
+                account
             WHERE
                 email = :email AND
                 password = :password;

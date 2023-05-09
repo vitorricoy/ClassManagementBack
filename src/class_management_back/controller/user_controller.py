@@ -24,9 +24,9 @@ class UserResource(Resource):
             args.password = hash.hexdigest()
             user = user_service.create_user_by_email_password(args)
             user_dict = user.dict()
-            del user_dict["password"]
+            token = (jwt.encode({**user_dict}, JWT_SECRET, algorithm="HS256"),)
             return (
-                jwt.encode({**user_dict}, JWT_SECRET, algorithm="HS256"),
+                {"token": token},
                 200,
             )
         except AccountAlreadyExistsException:
@@ -34,7 +34,9 @@ class UserResource(Resource):
         except ErrorCreatingAccountException:
             return "ErrorCreatingAccount", 400
 
-    def get(self):
+
+class UserLoginResource(Resource):
+    def post(self):
         try:
             token_user = get_user_from_token()
             if token_user:
@@ -44,8 +46,11 @@ class UserResource(Resource):
             hash.update(args.password.encode("utf8"))
             args.password = hash.hexdigest()
             user = user_service.get_user_by_email_password(args)
+            token = jwt.encode({**user.dict()}, JWT_SECRET, algorithm="HS256")
             return (
-                jwt.encode({**user.dict()}, JWT_SECRET, algorithm="HS256"),
+                {
+                    "token": token,
+                },
                 200,
             )
         except CouldNotFindAccountException:

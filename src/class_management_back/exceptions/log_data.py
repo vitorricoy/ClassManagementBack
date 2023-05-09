@@ -30,6 +30,10 @@ class ErrorCreatingActivityGradeException(Exception):
     pass
 
 
+class ErrorCreatingPredictionException(Exception):
+    pass
+
+
 class InvalidModuleName(Exception):
     def __init__(self, name: str):
         super().__init__(f"No module with the name: {name} found")

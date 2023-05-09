@@ -21,6 +21,8 @@ pydantic = {extras = ["email"], version = "^1.10.5"}
 PyJWT = "^2.6.0"
 pandas = "^2.0.1"
 numpy = "^1.24.3"
+joblib = "^1.2.0"
+scikit-learn = "^1.2.2"
 
 [tool.pyright]
 include = ["src"]
