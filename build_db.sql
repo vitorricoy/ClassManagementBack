@@ -1,5 +1,7 @@
 CREATE DATABASE class_management;
 
+\c class_management
+
 CREATE TABLE account (
     code serial PRIMARY KEY,
     name text NOT NULL, 
