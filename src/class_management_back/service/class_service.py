@@ -6,3 +6,6 @@ class_model = ClassModel()
 class ClassService:
     def get_classes(self, user_code: int):
         return class_model.get_classes(user_code)
+
+    def get_class(self, user_code: int, class_code: int):
+        return class_model.get_classes(user_code)
