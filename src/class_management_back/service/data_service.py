@@ -21,6 +21,15 @@ from joblib import load
 
 data_model = DataModel()
 
+
+def isfloat(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
+
+
 predictions = load("model.joblib")
 
 all_modules = [
@@ -271,7 +280,9 @@ class DataService:
         for column in data:
             column = str(column)
             if "Entrega" in column:
-                data[column] = data[column].map(mapa).astype("bool")
+                new_column = 'Exercício Prático - ' + column.split(' - ', 1)[1]
+                data[new_column] = data[column].map(mapa).astype("bool")
+                del data[column]
         return data
 
     def _treat_grade_data(self, data: DataFrame):
@@ -286,15 +297,13 @@ class DataService:
                 return True
             except ValueError:
                 return False
-
         name_column = (data["Nome"] + " " + data["Sobrenome"]).copy()
         for column in data:
             column = str(column)
             if "Questionário" in column:
-                new_column = column.replace("Questionário: ", "")
-                data[new_column] = (
-                    data[column].apply(lambda x: isfloat(x)).astype("bool")
-                )
+                new_column = column.replace(
+                    "Questionário: ", "").replace(" (Real)", "")
+                data[new_column] = data[column]
                 del data[column]
         del data["Sobrenome"]
         data["Nome"] = name_column
@@ -383,7 +392,12 @@ class DataService:
 
     def _get_activity_name(self, name: str):
         names = name.split(":")
-        return ":".join(names[1:])
+        new_name = ":".join(names[1:])
+
+        if "Entrega" in new_name:
+            print(new_name, flush=True)
+            return 'Exercício Prático - ' + new_name.split(' - ', 1)[1]
+        return new_name
 
     def _save_materials(self, modules: list[Module], log_data: DataFrame):
         events_modules_data = log_data[["Contexto do Evento", "modulo"]]
@@ -453,6 +467,7 @@ class DataService:
         students: list[Student],
         materials: list[Material],
         delivery_data: DataFrame,
+        grade_data: DataFrame,
     ):
         return [
             data_model.create_activity_delivery(
@@ -465,6 +480,17 @@ class DataService:
             for column in delivery_data
             if "email" not in str(column)
             if row[column]
+        ] + [
+            data_model.create_activity_delivery(
+                self._get_material_code_by_name(str(column), materials),
+                self._get_student_code_by_email(
+                    str(row["Endereço de email"]), students
+                ),
+            )
+            for _, row in grade_data.iterrows()
+            for column in grade_data
+            if "email" not in str(column) and "Nome" not in str(column)
+            if row[column] and isfloat(row[column])
         ]
 
     def _save_activity_grade(
@@ -475,15 +501,15 @@ class DataService:
     ):
         return [
             data_model.create_activity_grade(
+                self._get_material_code_by_name(str(column), materials),
                 self._get_student_code_by_email(
                     str(row["Endereço de email"]), students
                 ),
-                self._get_material_code_by_name(str(column), materials),
-                float(str(row[column])),
+                float(row[column]),
             )
             for _, row in grade_data.iterrows()
             for column in grade_data
-            if "email" not in str(column) and "Nome" not in str(column)
+            if "email" not in str(column) and "Nome" not in str(column) and isfloat(row[column])
         ]
 
     def _process_prediction_data(self, delivery_data: DataFrame):
@@ -614,6 +640,8 @@ class DataService:
         students = self._save_students(grade_data, new_class.code)
         self._save_class_view(students, log_data)
         self._save_material_view(materials, students, log_data)
-        self._save_activity_delivery(students, materials, delivery_data)
+        self._save_activity_delivery(
+            students, materials, delivery_data, grade_data)
         self._save_activity_grade(students, materials, grade_data)
         self._save_predictions(original_delivery_data, students)
+        return new_class
