@@ -1,4 +1,6 @@
-from class_management_back.controller.approval_controller import ApprovalProbabilityResource
+from class_management_back.controller.approval_controller import (
+    ApprovalProbabilityResource,
+)
 from class_management_back.controller.class_controller import ClassResource
 from class_management_back.controller.delivery_controller import (
     DeliveryActivityCountResource,
