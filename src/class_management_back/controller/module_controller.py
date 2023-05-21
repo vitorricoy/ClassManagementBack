@@ -16,12 +16,12 @@ class ModuleHeatmapResource(Resource):
         if not token_user:
             return "Unauthenticated", 401
 
-        grade_data = module_model.get_module_heatmap(
+        module_data = module_model.get_module_heatmap(
             class_code.class_code, token_user.code)
 
         response = {}
 
-        for entry in grade_data:
+        for entry in module_data:
             if entry.email not in response:
                 response[entry.email] = {}
             response[entry.email][entry.module] = entry.conclusion
