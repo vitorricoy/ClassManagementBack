@@ -1,5 +1,9 @@
 from class_management_back.db.config import query_db
-from class_management_back.schema.delivery import DeliveryActivityCount, DeliveryHeatMap, DeliveryStudentCount
+from class_management_back.schema.delivery import (
+    DeliveryActivityCount,
+    DeliveryHeatMap,
+    DeliveryStudentCount,
+)
 
 
 class DeliveryModel:
@@ -32,11 +36,9 @@ class DeliveryModel:
                 INNER JOIN
                     class
                 ON
+                    student.class_code = class.code AND
                     class.user_code = :user_code AND
                     class.code = :class_code
-                WHERE
-                    student.class_code = :class_code AND
-                    module.class_code = :class_code
             )
             SELECT
                 email,
@@ -86,11 +88,9 @@ class DeliveryModel:
                 INNER JOIN
                     class
                 ON
+                    student.class_code = class.code AND
                     class.user_code = :user_code AND
                     class.code = :class_code
-                WHERE
-                    student.class_code = :class_code AND
-                    module.class_code = :class_code
             )
             SELECT
                 email,
@@ -143,11 +143,9 @@ class DeliveryModel:
                 INNER JOIN
                     class
                 ON
+                    student.class_code = class.code AND
                     class.user_code = :user_code AND
                     class.code = :class_code
-                WHERE
-                    student.class_code = :class_code AND
-                    module.class_code = :class_code
             )
             SELECT
                 activity,

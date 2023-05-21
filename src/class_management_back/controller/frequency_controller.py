@@ -1,20 +1,16 @@
 from flask_restful import Resource
 from class_management_back.helper.parser import (
-    parse_from_request,
     parse_from_request_with_location,
 )
 
-from class_management_back.helper.user import (
-    get_user_from_token,
-    get_user_from_token_with_location,
-)
-from class_management_back.model.delivery_model import DeliveryModel
+from class_management_back.helper.user import get_user_from_token_with_location
+from class_management_back.model.frequency_model import FrequencyModel
 from class_management_back.schema.common import ClassCode
 
-delivery_model = DeliveryModel()
+frequency_model = FrequencyModel()
 
 
-class DeliveryHeatmapResource(Resource):
+class FrequencyHeatmapResource(Resource):
     def get(self):
         token_user = get_user_from_token_with_location(location="args")
         class_code = parse_from_request_with_location(
@@ -23,21 +19,21 @@ class DeliveryHeatmapResource(Resource):
         if not token_user:
             return "Unauthenticated", 401
 
-        delivery_data = delivery_model.get_delivery_heatmap(
+        frequency_data = frequency_model.get_heatmap(
             class_code.class_code, token_user.code
         )
 
         response = {}
 
-        for entry in delivery_data:
+        for entry in frequency_data:
             if entry.email not in response:
                 response[entry.email] = {}
-            response[entry.email][entry.activity] = entry.delivered
+            response[entry.email][entry.week] = entry.frequency
 
         return response, 200
 
 
-class DeliveryStudentCountResource(Resource):
+class FrequencyStudentMeanResource(Resource):
     def get(self):
         token_user = get_user_from_token_with_location(location="args")
         class_code = parse_from_request_with_location(
@@ -46,14 +42,14 @@ class DeliveryStudentCountResource(Resource):
         if not token_user:
             return "Unauthenticated", 401
 
-        delivery_data = delivery_model.get_delivery_student_count(
+        frequency_data = frequency_model.get_student_mean(
             class_code.class_code, token_user.code
         )
 
-        return [d.dict() for d in delivery_data], 200
+        return [f.dict() for f in frequency_data], 200
 
 
-class DeliveryActivityCountResource(Resource):
+class FrequencyWeekMeanResource(Resource):
     def get(self):
         token_user = get_user_from_token_with_location(location="args")
         class_code = parse_from_request_with_location(
@@ -62,8 +58,8 @@ class DeliveryActivityCountResource(Resource):
         if not token_user:
             return "Unauthenticated", 401
 
-        delivery_data = delivery_model.get_delivery_activity_count(
+        frequency_data = frequency_model.get_week_mean(
             class_code.class_code, token_user.code
         )
 
-        return [d.dict() for d in delivery_data], 200
+        return [f.dict() for f in frequency_data], 200

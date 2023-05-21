@@ -233,11 +233,19 @@ class DataService:
         }
 
         def identify_module(row):
+            if row["Nome do evento"] == "Curso visto":
+                row["modulo"] = "dummy"
+                return row
+            if row["Nome do evento"] != "Módulo do curso visualizado":
+                row["modulo"] = None
+                return row
             for module in modules:
                 for substr in modules[module]:
                     if substr in row["Contexto do Evento"]:
                         row["modulo"] = module
                         return row
+                    if row["Nome do evento"] == "Curso visto":
+                        row["modulo"] = "dummy"
             row["modulo"] = None
             return row
 
@@ -263,12 +271,10 @@ class DataService:
 
         for ignored_user in ignored_users:
             data = data[data["Nome completo"] != ignored_user]
-
         data = data[data["Nome completo"] != "-"]
 
         data = data[~data["Contexto do Evento"].isin(ignored_activities)]
 
-        data.to_csv("log_data.csv")
         data = self._assign_modules(data)  # type: ignore
         return data
 
@@ -280,7 +286,7 @@ class DataService:
         for column in data:
             column = str(column)
             if "Entrega" in column:
-                new_column = 'Exercício Prático - ' + column.split(' - ', 1)[1]
+                new_column = "Exercício Prático - " + column.split(" - ", 1)[1]
                 data[new_column] = data[column].map(mapa).astype("bool")
                 del data[column]
         return data
@@ -297,12 +303,14 @@ class DataService:
                 return True
             except ValueError:
                 return False
+
         name_column = (data["Nome"] + " " + data["Sobrenome"]).copy()
         for column in data:
             column = str(column)
             if "Questionário" in column:
-                new_column = column.replace(
-                    "Questionário: ", "").replace(" (Real)", "")
+                new_column = column.replace("Questionário: ", "").replace(
+                    " (Real)", ""
+                )
                 data[new_column] = data[column]
                 del data[column]
         del data["Sobrenome"]
@@ -395,12 +403,11 @@ class DataService:
         new_name = ":".join(names[1:])
 
         if "Entrega" in new_name:
-            print(new_name, flush=True)
-            return 'Exercício Prático - ' + new_name.split(' - ', 1)[1]
+            return "Exercício Prático - " + new_name.split(" - ", 1)[1]
         return new_name
 
     def _save_materials(self, modules: list[Module], log_data: DataFrame):
-        events_modules_data = log_data[["Contexto do Evento", "modulo"]]
+        events_modules_data = log_data[["Contexto do Evento", "modulo"]].copy()
         events_modules_data = events_modules_data.drop_duplicates()
         return [
             data_model.create_material(
@@ -425,7 +432,8 @@ class DataService:
                 "modulo",
                 "Hora",
             ]
-        ].drop_duplicates()
+        ].copy()
+        events_modules_data = events_modules_data.drop_duplicates()
         return [
             data_model.create_material_view(
                 self._get_material_code_by_name(
@@ -446,13 +454,12 @@ class DataService:
     ):
         events_modules_data = log_data[
             [
-                "Contexto do Evento",
                 "Nome completo",
                 "Nome do evento",
-                "modulo",
                 "Hora",
             ]
-        ].drop_duplicates()
+        ].copy()
+        events_modules_data = events_modules_data.drop_duplicates()
         return [
             data_model.create_class_view(
                 self._get_student_code_by_name(row["Nome completo"], students),
@@ -509,13 +516,15 @@ class DataService:
             )
             for _, row in grade_data.iterrows()
             for column in grade_data
-            if "email" not in str(column) and "Nome" not in str(column) and isfloat(row[column])
+            if "email" not in str(column)
+            and "Nome" not in str(column)
+            and isfloat(row[column])
         ]
 
     def _process_prediction_data(self, delivery_data: DataFrame):
         df = delivery_data[
             delivery_data["Endereço de email"] != "nailtonjr@gmail.com"
-        ]
+        ].copy()
         df = df.drop(df.filter(regex="^(Unnamed*)", axis=1).columns, axis=1)
         df_temp = df.copy()
         for column in df.columns:
@@ -612,7 +621,7 @@ class DataService:
         for i in range(arr.shape[1]):
             if np.any(arr[:, i]):
                 num_activ = i + 1
-        X_data = arr[:, 1: num_activ + 1]
+        X_data = arr[:, 1 : num_activ + 1]
 
         prediction = predictions[num_activ - 1].predict_proba(X_data)[:, 1]
         for i, v in enumerate(prediction):
@@ -641,7 +650,8 @@ class DataService:
         self._save_class_view(students, log_data)
         self._save_material_view(materials, students, log_data)
         self._save_activity_delivery(
-            students, materials, delivery_data, grade_data)
+            students, materials, delivery_data, grade_data
+        )
         self._save_activity_grade(students, materials, grade_data)
         self._save_predictions(original_delivery_data, students)
         return new_class

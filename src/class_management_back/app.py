@@ -1,8 +1,26 @@
 from class_management_back.controller.class_controller import ClassResource
-from class_management_back.controller.delivery_controller import DeliveryActivityCountResource, DeliveryHeatmapResource, DeliveryStudentCountResource
-from class_management_back.controller.grade_controller import GradeHeatmapResource, GradeStudentResource
-from class_management_back.controller.module_controller import ModuleHeatmapResource
-from class_management_back.controller.progress_controller import ProgressMeanStudentResource, ProgressRepetitionMaterialResource, ProgressRepetitionMaterialStudentResource
+from class_management_back.controller.delivery_controller import (
+    DeliveryActivityCountResource,
+    DeliveryHeatmapResource,
+    DeliveryStudentCountResource,
+)
+from class_management_back.controller.frequency_controller import (
+    FrequencyHeatmapResource,
+    FrequencyStudentMeanResource,
+    FrequencyWeekMeanResource,
+)
+from class_management_back.controller.grade_controller import (
+    GradeHeatmapResource,
+    GradeStudentResource,
+)
+from class_management_back.controller.module_controller import (
+    ModuleHeatmapResource,
+)
+from class_management_back.controller.progress_controller import (
+    ProgressMeanStudentResource,
+    ProgressRepetitionMaterialResource,
+    ProgressRepetitionMaterialStudentResource,
+)
 from class_management_back.controller.user_controller import (
     UserLoginResource,
     UserResource,
@@ -24,10 +42,16 @@ api.add_resource(GradeHeatmapResource, "/grade/heatmap")
 api.add_resource(GradeStudentResource, "/grade/student")
 api.add_resource(ModuleHeatmapResource, "/module/heatmap")
 api.add_resource(ProgressMeanStudentResource, "/progress/mean_student")
-api.add_resource(ProgressRepetitionMaterialStudentResource,
-                 "/progress/repetition_material_student")
-api.add_resource(ProgressRepetitionMaterialResource,
-                 "/progress/repetition_material")
+api.add_resource(
+    ProgressRepetitionMaterialStudentResource,
+    "/progress/repetition_material_student",
+)
+api.add_resource(
+    ProgressRepetitionMaterialResource, "/progress/repetition_material"
+)
+api.add_resource(FrequencyHeatmapResource, "/frequency/heatmap")
+api.add_resource(FrequencyStudentMeanResource, "/frequency/student_mean")
+api.add_resource(FrequencyWeekMeanResource, "/frequency/week_mean")
 
 cors = CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"

@@ -1,6 +1,10 @@
 from class_management_back.db.config import query_db
 from class_management_back.schema.module import ModuleHeatMap
-from class_management_back.schema.progress import ProgressMeanStudent, ProgressRepetitionMaterial, ProgressRepetitionMaterialStudent
+from class_management_back.schema.progress import (
+    ProgressMeanStudent,
+    ProgressRepetitionMaterial,
+    ProgressRepetitionMaterialStudent,
+)
 
 
 class ProgressModel:
@@ -28,11 +32,9 @@ class ProgressModel:
                 INNER JOIN
                     class
                 ON
+                    student.class_code = class.code AND
                     class.user_code = :user_code AND
                     class.code = :class_code
-                WHERE
-                    student.class_code = :class_code AND
-                    module.class_code = :class_code
                 GROUP BY
                     student.email, material.name, material.code
             )
@@ -73,11 +75,9 @@ class ProgressModel:
                 INNER JOIN
                     class
                 ON
+                    student.class_code = class.code AND
                     class.user_code = :user_code AND
                     class.code = :class_code
-                WHERE
-                    student.class_code = :class_code AND
-                    module.class_code = :class_code
                 GROUP BY
                     student.email, material.name, material.code
             ), mean_student_repetition AS (
@@ -130,11 +130,9 @@ class ProgressModel:
                 INNER JOIN
                     class
                 ON
+                    student.class_code = class.code AND
                     class.user_code = :user_code AND
                     class.code = :class_code
-                WHERE
-                    student.class_code = :class_code AND
-                    module.class_code = :class_code
                 GROUP BY
                     student.email, material.name, material.code
             )

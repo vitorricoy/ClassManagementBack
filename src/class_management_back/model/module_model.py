@@ -1,5 +1,8 @@
 from class_management_back.db.config import query_db
-from class_management_back.schema.delivery import DeliveryActivityCount, DeliveryStudentCount
+from class_management_back.schema.delivery import (
+    DeliveryActivityCount,
+    DeliveryStudentCount,
+)
 from class_management_back.schema.grade import GradeHeatMap, GradeStudent
 from class_management_back.schema.module import ModuleHeatMap
 
@@ -37,11 +40,9 @@ class ModuleModel:
                 INNER JOIN
                     class
                 ON
+                    student.class_code = class.code AND
                     class.user_code = :user_code AND
                     class.code = :class_code
-                WHERE
-                    student.class_code = :class_code AND
-                    module.class_code = :class_code
                 GROUP BY
                     student.email, module.name, module.code
             ), module_total_view AS (
@@ -57,6 +58,7 @@ class ModuleModel:
                 INNER JOIN
                     class
                 ON
+                    module.class_code = class.code AND
                     class.code = module.class_code AND
                     class.user_code = :user_code
                 WHERE

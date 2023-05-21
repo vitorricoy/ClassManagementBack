@@ -2,7 +2,9 @@ from io import StringIO
 from flask import request
 from flask_restful import Resource
 import pandas as pd
-from class_management_back.helper.parser import parse_from_request_with_location
+from class_management_back.helper.parser import (
+    parse_from_request_with_location,
+)
 from class_management_back.helper.user import get_user_from_token_with_location
 from class_management_back.schema.data import DataUploadParams
 
@@ -38,7 +40,8 @@ class ClassResource(Resource):
         )
         args = parse_from_request_with_location(DataUploadParams, "form")
         new_class = data_service.process_data(
-            log_data, delivery_data, grade_data, args)
+            log_data, delivery_data, grade_data, args
+        )
 
         user = get_user_from_token_with_location(location="form")
         if not user:

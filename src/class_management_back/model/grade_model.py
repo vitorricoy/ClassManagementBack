@@ -1,5 +1,8 @@
 from class_management_back.db.config import query_db
-from class_management_back.schema.delivery import DeliveryActivityCount, DeliveryStudentCount
+from class_management_back.schema.delivery import (
+    DeliveryActivityCount,
+    DeliveryStudentCount,
+)
 from class_management_back.schema.grade import GradeHeatMap, GradeStudent
 
 
@@ -28,11 +31,9 @@ class GradeModel:
                 INNER JOIN
                     class
                 ON
+                    student.class_code = class.code AND
                     class.user_code = :user_code AND
                     class.code = :class_code
-                WHERE
-                    student.class_code = :class_code AND
-                    module.class_code = :class_code
             )
             SELECT
                 email,
@@ -77,11 +78,9 @@ class GradeModel:
                 INNER JOIN
                     class
                 ON
+                    student.class_code = class.code AND
                     class.user_code = :user_code AND
                     class.code = :class_code
-                WHERE
-                    student.class_code = :class_code AND
-                    module.class_code = :class_code
             ), grade_max AS (
                 SELECT
                     material_code,
@@ -103,6 +102,7 @@ class GradeModel:
                 INNER JOIN
                     class
                 ON
+                    student.class_code = class.code AND
                     class.code = module.class_code AND
                     class.user_code = :user_code
                 WHERE
