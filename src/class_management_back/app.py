@@ -1,3 +1,4 @@
+from class_management_back.controller.approval_controller import ApprovalProbabilityResource
 from class_management_back.controller.class_controller import ClassResource
 from class_management_back.controller.delivery_controller import (
     DeliveryActivityCountResource,
@@ -52,6 +53,7 @@ api.add_resource(
 api.add_resource(FrequencyHeatmapResource, "/frequency/heatmap")
 api.add_resource(FrequencyStudentMeanResource, "/frequency/student_mean")
 api.add_resource(FrequencyWeekMeanResource, "/frequency/week_mean")
+api.add_resource(ApprovalProbabilityResource, "/approval/probability")
 
 cors = CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
