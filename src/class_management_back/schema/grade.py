@@ -1,15 +1,15 @@
 from pydantic import BaseModel
 
 
-class DeliveryHeatMap(BaseModel):
+class GradeHeatMap(BaseModel):
     email: str
     activity: str
-    delivered: bool
+    grade: float
 
 
-class DeliveryStudentCount(BaseModel):
+class GradeStudent(BaseModel):
     email: str
-    count: int
+    grade: float
 
 
 class DeliveryActivityCount(BaseModel):

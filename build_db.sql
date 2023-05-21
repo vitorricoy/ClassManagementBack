@@ -67,3 +67,5 @@ CREATE TABLE approval_prediction (
 );
 
 CREATE UNIQUE INDEX ON account(email);
+
+CREATE INDEX ON material_view(material_code);

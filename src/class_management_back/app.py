@@ -1,4 +1,7 @@
 from class_management_back.controller.class_controller import ClassResource
+from class_management_back.controller.delivery_controller import DeliveryActivityCountResource, DeliveryHeatmapResource, DeliveryStudentCountResource
+from class_management_back.controller.grade_controller import GradeHeatmapResource, GradeStudentResource
+from class_management_back.controller.module_controller import ModuleHeatmapResource
 from class_management_back.controller.user_controller import (
     UserLoginResource,
     UserResource,
@@ -13,6 +16,12 @@ api = Api(app)
 api.add_resource(UserResource, "/user")
 api.add_resource(UserLoginResource, "/user/login")
 api.add_resource(ClassResource, "/class")
+api.add_resource(DeliveryHeatmapResource, "/delivery/heatmap")
+api.add_resource(DeliveryStudentCountResource, "/delivery/student_count")
+api.add_resource(DeliveryActivityCountResource, "/delivery/activity_count")
+api.add_resource(GradeHeatmapResource, "/grade/heatmap")
+api.add_resource(GradeStudentResource, "/grade/student")
+api.add_resource(ModuleHeatmapResource, "/module/heatmap")
 
 cors = CORS(app)
 app.config["CORS_HEADERS"] = "Content-Type"
