@@ -7,11 +7,11 @@ class ApprovalModel:
         query = """
             SELECT
                 student.email,
-                approval_prediction.probability * 100 as probability
+                COALESCE(approval_prediction.probability * 100, 0) as probability
             FROM
-                approval_prediction
-            INNER JOIN
                 student
+            LEFT JOIN
+                approval_prediction
             ON
                 student.code = approval_prediction.student_code
             INNER JOIN

@@ -362,7 +362,7 @@ class DataService:
         )
         if first_or_default:
             return first_or_default.code
-        raise InvalidStudentName(name)
+        return None
 
     def _get_student_code_by_email(self, email: str, students: list[Student]):
         first_or_default = next(
@@ -375,7 +375,7 @@ class DataService:
         )
         if first_or_default:
             return first_or_default.code
-        raise InvalidStudentEmail(email)
+        return None
 
     def _get_material_code_by_name(self, name: str, materials: list[Material]):
         first_or_default = next(
@@ -388,7 +388,7 @@ class DataService:
         )
         if first_or_default:
             return first_or_default.code
-        raise InvalidMaterialName(name)
+        return None
 
     def _is_valid_activity(self, name: str):
         return (
@@ -445,6 +445,11 @@ class DataService:
             )
             for _, row in events_modules_data.iterrows()
             if row["Nome do evento"] == "Módulo do curso visualizado"
+            and self._get_student_code_by_name(row["Nome completo"], students)
+            and self._get_material_code_by_name(
+                self._get_activity_name(row["Contexto do Evento"]),
+                materials,
+            )
         ]
 
     def _save_class_view(
@@ -467,6 +472,7 @@ class DataService:
             )
             for _, row in events_modules_data.iterrows()
             if row["Nome do evento"] == "Curso visto"
+            and self._get_student_code_by_name(row["Nome completo"], students)
         ]
 
     def _save_activity_delivery(
@@ -487,6 +493,10 @@ class DataService:
             for column in delivery_data
             if "email" not in str(column)
             if row[column]
+            and self._get_student_code_by_email(
+                str(row["Endereço de email"]), students
+            )
+            and self._get_material_code_by_name(str(column), materials)
         ] + [
             data_model.create_activity_delivery(
                 self._get_material_code_by_name(str(column), materials),
@@ -497,7 +507,12 @@ class DataService:
             for _, row in grade_data.iterrows()
             for column in grade_data
             if "email" not in str(column) and "Nome" not in str(column)
-            if row[column] and isfloat(row[column])
+            if row[column]
+            and isfloat(row[column])
+            and self._get_student_code_by_email(
+                str(row["Endereço de email"]), students
+            )
+            and self._get_material_code_by_name(str(column), materials)
         ]
 
     def _save_activity_grade(
@@ -519,6 +534,10 @@ class DataService:
             if "email" not in str(column)
             and "Nome" not in str(column)
             and isfloat(row[column])
+            and self._get_student_code_by_email(
+                str(row["Endereço de email"]), students
+            )
+            and self._get_material_code_by_name(str(column), materials)
         ]
 
     def _process_prediction_data(self, delivery_data: DataFrame):
@@ -589,11 +608,9 @@ class DataService:
 
         df_ativ = df_ativ.apply(calc_perc, axis=1)
         df_ativ_perc = df_ativ[["perc"]]
-        # df_ativ_perc.plot()
 
         df_exs = df_exs.apply(calc_perc, axis=1)
         df_exs_perc = df_exs[["perc"]]
-        # df_exs_perc.plot()
 
         df_ativ_perc["passou"] = df_ativ_perc["perc"] > 0.75
         df_exs_perc["passou"] = df_exs_perc["perc"] > 0.6
@@ -625,10 +642,11 @@ class DataService:
 
         prediction = predictions[num_activ - 1].predict_proba(X_data)[:, 1]
         for i, v in enumerate(prediction):
-            data_model.create_approval_prediction(
-                self._get_student_code_by_email(emails[i], students),
-                v,
-            )
+            if self._get_student_code_by_email(emails[i], students):
+                data_model.create_approval_prediction(
+                    self._get_student_code_by_email(emails[i], students),
+                    v,
+                )
 
     def process_data(
         self,
