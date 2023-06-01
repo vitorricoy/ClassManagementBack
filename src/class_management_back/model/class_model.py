@@ -13,6 +13,8 @@ class ClassModel:
                 class
             WHERE
                 user_code = :user_code
+            ORDER BY
+                code;
         """
         result = query_db(query, user_code=user_code)
         return [Class(**r) for r in result]
