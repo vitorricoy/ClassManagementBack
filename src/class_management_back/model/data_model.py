@@ -222,3 +222,29 @@ class DataModel:
         if not result or not result[0]:
             raise ErrorCreatingPredictionException()
         return Prediction(**result[0])
+
+    def delete_class(self, class_code: int):
+        query = """
+            DELETE FROM class_view WHERE student_code IN (SELECT code FROM student WHERE class_code = :class_code);
+
+            DELETE FROM material_view WHERE student_code IN (SELECT code FROM student WHERE class_code = :class_code);
+
+            DELETE FROM activity_delivery WHERE student_code IN (SELECT code FROM student WHERE class_code = :class_code);
+
+            DELETE FROM activity_grade WHERE student_code IN (SELECT code FROM student WHERE class_code = :class_code);
+
+            DELETE FROM approval_prediction WHERE student_code IN (SELECT code FROM student WHERE class_code = :class_code);
+
+            DELETE FROM student WHERE class_code = :class_code;
+
+            DELETE FROM material WHERE module_code IN (SELECT code FROM module WHERE class_code = :class_code);
+
+            DELETE FROM module WHERE class_code = :class_code;
+
+            DELETE FROM class WHERE code = :class_code;
+        """
+
+        query_db(
+            query,
+            class_code=class_code,
+        )
