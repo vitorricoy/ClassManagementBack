@@ -638,7 +638,7 @@ class DataService:
         for i in range(arr.shape[1]):
             if np.any(arr[:, i]):
                 num_activ = i + 1
-        X_data = arr[:, 1 : num_activ + 1]
+        X_data = arr[:, 1: num_activ + 1]
 
         prediction = predictions[num_activ - 1].predict_proba(X_data)[:, 1]
         for i, v in enumerate(prediction):
@@ -655,7 +655,15 @@ class DataService:
         grade_data: DataFrame,
         args: DataUploadParams,
     ):
-        new_class = self._save_class(args.class_name)
+        if args.class_name:
+            new_class = self._save_class(args.class_name)
+        elif args.class_code:
+            user = get_user_from_token_with_location(location="form")
+            old_class = data_model.get_class(user.code, args.class_code)
+            data_model.delete_class(args.class_code)
+            new_class = self._save_class(old_class.name)
+        else:
+            raise Exception('Impossible')
         log_data = self._treat_log_data(
             log_data, args.ignore_user_names, args.ignore_activities
         )

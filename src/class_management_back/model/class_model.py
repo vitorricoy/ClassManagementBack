@@ -14,7 +14,7 @@ class ClassModel:
             WHERE
                 user_code = :user_code
             ORDER BY
-                code;
+                code DESC;
         """
         result = query_db(query, user_code=user_code)
         return [Class(**r) for r in result]

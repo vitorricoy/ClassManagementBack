@@ -26,13 +26,13 @@ from class_management_back.schema.data import (
 class DataModel:
     def create_class(self, name: str, user_code: int):
         query = """
-            INSERT INTO 
+            INSERT INTO
                 class (
-                    name, 
+                    name,
                     user_code
-                ) 
+                )
             VALUES(
-                :name, 
+                :name,
                 :user_code
             )
             ON CONFLICT DO NOTHING
@@ -45,14 +45,14 @@ class DataModel:
 
     def create_student(self, name: str, email: str, class_code: int):
         query = """
-            INSERT INTO 
+            INSERT INTO
                 student (
-                    name, 
+                    name,
                     email,
                     class_code
-                ) 
+                )
             VALUES(
-                :name, 
+                :name,
                 :email,
                 :class_code
             )
@@ -66,13 +66,13 @@ class DataModel:
 
     def create_module(self, name: str, class_code: int):
         query = """
-            INSERT INTO 
+            INSERT INTO
                 module (
                     name,
                     class_code
-                ) 
+                )
             VALUES(
-                :name, 
+                :name,
                 :class_code
             )
             ON CONFLICT DO NOTHING
@@ -85,13 +85,13 @@ class DataModel:
 
     def create_material(self, name: str, module_code: int):
         query = """
-            INSERT INTO 
+            INSERT INTO
                 material (
                     name,
                     module_code
-                ) 
+                )
             VALUES(
-                :name, 
+                :name,
                 :module_code
             )
             ON CONFLICT DO NOTHING
@@ -104,13 +104,13 @@ class DataModel:
 
     def create_class_view(self, student_code: int, hour: str):
         query = """
-            INSERT INTO 
+            INSERT INTO
                 class_view (
                     student_code,
                     hour
-                ) 
+                )
             VALUES(
-                :student_code, 
+                :student_code,
                 :hour
             )
             ON CONFLICT DO NOTHING
@@ -125,14 +125,14 @@ class DataModel:
         self, material_code: int, student_code: int, hour: str
     ):
         query = """
-            INSERT INTO 
+            INSERT INTO
                 material_view (
                     student_code,
                     material_code,
                     hour
-                ) 
+                )
             VALUES(
-                :student_code, 
+                :student_code,
                 :material_code,
                 :hour
             )
@@ -151,13 +151,13 @@ class DataModel:
 
     def create_activity_delivery(self, material_code: int, student_code: int):
         query = """
-            INSERT INTO 
+            INSERT INTO
                 activity_delivery (
                     student_code,
                     material_code
-                ) 
+                )
             VALUES(
-                :student_code, 
+                :student_code,
                 :material_code
             )
             ON CONFLICT DO NOTHING
@@ -174,14 +174,14 @@ class DataModel:
         self, material_code: int, student_code: int, grade: float
     ):
         query = """
-            INSERT INTO 
+            INSERT INTO
                 activity_grade (
                     student_code,
                     material_code,
                     grade
-                ) 
+                )
             VALUES(
-                :student_code, 
+                :student_code,
                 :material_code,
                 :grade
             )
@@ -202,13 +202,13 @@ class DataModel:
         self, student_code: int, probability: float
     ):
         query = """
-            INSERT INTO 
+            INSERT INTO
                 approval_prediction (
                     student_code,
                     probability
-                ) 
+                )
             VALUES(
-                :student_code, 
+                :student_code,
                 :probability
             )
             ON CONFLICT DO NOTHING
@@ -222,6 +222,20 @@ class DataModel:
         if not result or not result[0]:
             raise ErrorCreatingPredictionException()
         return Prediction(**result[0])
+
+    def get_class(self, user_code: int, class_code: int):
+        query = """
+                SELECT
+                    *
+                FROM
+                    class
+                WHERE
+                    user_code = :user_code AND code = :class_code
+            """
+        result = query_db(query, user_code=user_code, class_code=class_code)
+        if not result:
+            return None
+        return Class(**result[0])
 
     def delete_class(self, class_code: int):
         query = """
@@ -242,6 +256,8 @@ class DataModel:
             DELETE FROM module WHERE class_code = :class_code;
 
             DELETE FROM class WHERE code = :class_code;
+
+            SELECT * FROM class;
         """
 
         query_db(

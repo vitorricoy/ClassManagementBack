@@ -4,7 +4,8 @@ from typing import Optional
 
 
 class DataUploadParams(BaseModel):
-    class_name: str
+    class_name: Optional[str] = None
+    class_code: Optional[int] = None
     ignore_user_names: list[str]
     ignore_activities: list[str]
 
@@ -20,6 +21,8 @@ class DataUploadParams(BaseModel):
             if values.get("ignore_user_names")
             else []
         )
+        if not values.get("class_name") and not values.get("class_code"):
+            raise ValueError("Need to give class name or code")
         return values
 
 
