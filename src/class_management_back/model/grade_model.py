@@ -11,7 +11,7 @@ class GradeModel:
         query = """
             WITH grades AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     material.name as activity,
                     material.code as material_code,
                     COALESCE(activity_grade.grade, 0) as grade
@@ -58,7 +58,7 @@ class GradeModel:
         query = """
             WITH grades AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     material.name as activity,
                     material.code as material_code,
                     COALESCE(activity_grade.grade, 0) as grade

@@ -12,7 +12,7 @@ class ModuleModel:
         query = """
             WITH module_conclusion AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     module.name as module,
                     module.code as module_code,
                     SUM(CASE WHEN material_seen.seen IS NULL THEN 0 ELSE 1 END) as count
@@ -44,7 +44,7 @@ class ModuleModel:
                     class.user_code = :user_code AND
                     class.code = :class_code
                 GROUP BY
-                    student.email, module.name, module.code
+                    student.name, module.name, module.code
             ), module_total_view AS (
                 SELECT
                     module.code as module_code,

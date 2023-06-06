@@ -12,7 +12,7 @@ class ProgressModel:
         query = """
             WITH views_by_material AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     material.name as material,
                     material.code as material_code,
                     COUNT(material_view.code) as count
@@ -36,7 +36,7 @@ class ProgressModel:
                     class.user_code = :user_code AND
                     class.code = :class_code
                 GROUP BY
-                    student.email, material.name, material.code
+                    student.name, material.name, material.code
             )
             SELECT
                 views_by_material.email,
@@ -55,7 +55,7 @@ class ProgressModel:
         query = """
             WITH views_by_material AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     material.name as material,
                     material.code as material_code,
                     COUNT(material_view.code) as count
@@ -79,7 +79,7 @@ class ProgressModel:
                     class.user_code = :user_code AND
                     class.code = :class_code
                 GROUP BY
-                    student.email, material.name, material.code
+                    student.name, material.name, material.code
             ), mean_student_repetition AS (
                 SELECT
                     views_by_material.email,
@@ -110,7 +110,7 @@ class ProgressModel:
         query = """
             WITH views_by_material AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     material.name as material,
                     material.code as material_code,
                     COUNT(material_view.code) as count
@@ -134,7 +134,7 @@ class ProgressModel:
                     class.user_code = :user_code AND
                     class.code = :class_code
                 GROUP BY
-                    student.email, material.name, material.code
+                    student.name, material.name, material.code
             )
             SELECT
                 views_by_material.material,

@@ -11,7 +11,7 @@ class DeliveryModel:
         query = """
             wITH deliveries AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     material.name as activity,
                     material.code as material_code,
                     (
@@ -63,7 +63,7 @@ class DeliveryModel:
         query = """
             wITH deliveries AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     material.name as activity,
                     material.code as material_code,
                     (
@@ -118,7 +118,7 @@ class DeliveryModel:
         query = """
             wITH deliveries AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     material.name as activity,
                     material.code as material_code,
                     (

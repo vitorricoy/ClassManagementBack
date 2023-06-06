@@ -33,7 +33,7 @@ class FrequencyModel:
                     class.user_code = :user_code
             )
             SELECT
-                student.email as email,
+                student.name as email,
                 TO_CHAR(weeks.week, 'DD/MM/YYYY') as week,
                 COUNT(class_view.code) as frequency
             FROM
@@ -52,7 +52,7 @@ class FrequencyModel:
                 class.user_code = :user_code AND
                 class.code = :class_code
             GROUP BY
-                student.email,
+                student.name,
                 weeks.week;
         """
         result = query_db(query, class_code=class_code, user_code=user_code)
@@ -78,7 +78,7 @@ class FrequencyModel:
                     class.user_code = :user_code
             ), frequencies AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     TO_CHAR(weeks.week, 'DD/MM/YYYY') as week,
                     COUNT(class_view.code) as frequency
                 FROM
@@ -97,7 +97,7 @@ class FrequencyModel:
                     class.user_code = :user_code AND
                     class.code = :class_code
                 GROUP BY
-                    student.email,
+                    student.name,
                     weeks.week
             )
             SELECT
@@ -133,8 +133,9 @@ class FrequencyModel:
                     class.user_code = :user_code
             ), frequencies AS (
                 SELECT
-                    student.email as email,
+                    student.name as email,
                     TO_CHAR(weeks.week, 'DD/MM/YYYY') as week,
+                    weeks.week as week_raw,
                     COUNT(class_view.code) as frequency
                 FROM
                     student
@@ -152,7 +153,7 @@ class FrequencyModel:
                     class.user_code = :user_code AND
                     class.code = :class_code
                 GROUP BY
-                    student.email,
+                    student.name,
                     weeks.week
             )
             SELECT
@@ -161,9 +162,9 @@ class FrequencyModel:
             FROM
                 frequencies
             GROUP BY
-                frequencies.week
+                frequencies.week, frequencies.week_raw
             ORDER BY
-                frequency DESC;
+                frequencies.week_raw;
         """
         result = query_db(query, class_code=class_code, user_code=user_code)
         return [FrequencyWeekMean(**r) for r in result]

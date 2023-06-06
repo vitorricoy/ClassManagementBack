@@ -6,7 +6,7 @@ class ApprovalModel:
     def get_probability(self, class_code: int, user_code: int):
         query = """
             SELECT
-                student.email,
+                student.name as email,
                 COALESCE(approval_prediction.probability * 100, 0) as probability
             FROM
                 student
