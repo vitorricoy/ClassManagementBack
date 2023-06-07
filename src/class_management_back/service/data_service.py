@@ -291,7 +291,7 @@ class DataService:
                 del data[column]
         return data
 
-    def _treat_grade_data(self, data: DataFrame):
+    def _treat_grade_data(self, data: DataFrame, ignored: list[str]):
         data = data.filter(
             regex="Nome|Sobrenome|(Endereço de email)|(Questionário:(.*)\\(Real\\))",
             axis=1,
@@ -315,6 +315,8 @@ class DataService:
                 del data[column]
         del data["Sobrenome"]
         data["Nome"] = name_column
+        for ignored_user in ignored:
+            data = data[data["Nome"] != ignored_user]
         return data
 
     def _save_class(self, name: str):
@@ -655,6 +657,7 @@ class DataService:
         grade_data: DataFrame,
         args: DataUploadParams,
     ):
+        print(args.ignore_user_names, flush=True)
         if args.class_name:
             new_class = self._save_class(args.class_name)
         elif args.class_code:
@@ -669,7 +672,7 @@ class DataService:
         )
         original_delivery_data = delivery_data.copy()
         delivery_data = self._treat_delivery_data(delivery_data)
-        grade_data = self._treat_grade_data(grade_data)
+        grade_data = self._treat_grade_data(grade_data, args.ignore_user_names)
         modules = self._save_modules(new_class.code)
         materials = self._save_materials(modules, log_data)
         students = self._save_students(grade_data, new_class.code)
