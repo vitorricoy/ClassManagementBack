@@ -25,16 +25,8 @@ jobs:
       - name: Install poetry
         run: pip install poetry
 
-      - name: Create requirements.txt
-        run: poetry export -f requirements.txt --output requirements.txt
-
-      - name: Create and start virtual environment
-        run: |
-          python -m venv venv
-          source venv/bin/activate
-      
-      - name: Install dependencies
-        run: pip install -r requirements.txt
+      - name: Install poetry
+        run: poetry install
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       
