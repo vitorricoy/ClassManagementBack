@@ -1,14 +1,16 @@
 from pydantic import BaseModel
 
+from class_management_back.schema.common import FakeName
+
 
 class GradeHeatMap(BaseModel):
-    email: str
+    email: FakeName
     activity: str
     grade: float
 
 
 class GradeStudent(BaseModel):
-    email: str
+    email: FakeName
     grade: float
 
 

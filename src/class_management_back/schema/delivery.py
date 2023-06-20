@@ -1,14 +1,16 @@
 from pydantic import BaseModel
 
+from class_management_back.schema.common import FakeName
+
 
 class DeliveryHeatMap(BaseModel):
-    email: str
+    email: FakeName
     activity: str
     delivered: bool
 
 
 class DeliveryStudentCount(BaseModel):
-    email: str
+    email: FakeName
     count: int
 
 

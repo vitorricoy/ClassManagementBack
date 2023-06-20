@@ -1,14 +1,16 @@
 from pydantic import BaseModel
 
+from class_management_back.schema.common import FakeName
+
 
 class FrequencyHeatMap(BaseModel):
-    email: str
+    email: FakeName
     week: str
     frequency: int
 
 
 class FrequencyStudentMean(BaseModel):
-    email: str
+    email: FakeName
     frequency: float
 
 
